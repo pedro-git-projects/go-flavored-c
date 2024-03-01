@@ -3,29 +3,24 @@ CFLAGS = -I$(INCLUDEDIR)
 LDFLAGS = -L$(SRCDIR) -ldatastructures
 
 SRCDIR = src/data_structures
-INCLUDEDIR = include/data_structures
+INCLUDEDIR = ./include/ 
 EXAMPLESDIR = examples/data_structures
 
-EXAMPLES = $(wildcard $(EXAMPLESDIR)/*.c)
-OBJS = $(EXAMPLES:$(EXAMPLESDIR)/%.c=%.o)
+EXAMPLE_SRCS = $(wildcard $(EXAMPLESDIR)/*.c)
+EXAMPLE_OBJS = $(EXAMPLE_SRCS:$(EXAMPLESDIR)/%.c=%.o)
 
 bear: $(SRCDIR)/slice.o
 
 $(SRCDIR)/slice.o:
-	bear $(CC) -c $(CFLAGS) -o $(SRCDIR)/slice.o $(SRCDIR)/slice.c
+	bear -- $(CC) -c $(CFLAGS) -I$(INCLUDEDIR) -o $(SRCDIR)/slice.o $(SRCDIR)/slice.c
 
-examples: $(OBJS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-$(EXAMPLESDIR)/%.out: $(EXAMPLESDIR)/%.o $(SRCDIR)/slice.o
-	$(CC) -o $@ $< $(SRCDIR)/slice.o $(LDFLAGS)
+examples: $(EXAMPLE_OBJS) $(SRCDIR)/slice.o
+	$(CC) -o $(EXAMPLE_OBJS:.o=.out) $(EXAMPLE_OBJS) $(SRCDIR)/slice.o $(LDFLAGS)
 
 run-examples: examples
-	@for example in $(EXAMPLES); do \
+	@for example in $(EXAMPLE_OBJS); do \
 		echo "Running $$example"; \
-		./$${example%.c}.out; \
+		./$${example%.o}.out; \
 	done
 
 clean:
